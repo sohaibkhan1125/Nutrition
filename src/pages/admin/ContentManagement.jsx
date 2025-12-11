@@ -6,6 +6,7 @@ import 'froala-editor/js/plugins.pkgd.min.js';
 import 'font-awesome/css/font-awesome.css';
 import 'froala-editor/js/third_party/font_awesome.min.js';
 import './ContentEditor.css';
+import { supabase } from '../../supabaseClient';
 
 const froalaConfig = {
 	placeholderText: 'Type or paste your content here!',
@@ -30,42 +31,30 @@ const ContentManagement = () => {
 
 	const loadContent = async () => {
 		try {
-			const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
-			const isDevelopment = process.env.NODE_ENV === 'development';
-			
-			if (!isDevelopment || process.env.REACT_APP_API_URL) {
-				const response = await fetch(`${API_BASE_URL}/api/settings`);
-				if (response.ok) {
-					const data = await response.json();
-					setContent(data.content || '');
-					// Keep legacy sinks updated for live display components
-					if (data && typeof data.content === 'string') {
-						localStorage.setItem('customContent', data.content);
-						window.dispatchEvent(new CustomEvent('contentUpdated', { detail: { content: data.content } }));
-					}
+			const { data, error } = await supabase
+				.from('website_content')
+				.select('content')
+				.eq('id', 1)
+				.single();
+
+			if (error) {
+				// If no row exists yet, that's okay - we'll create it on first save
+				if (error.code === 'PGRST116') {
+					console.log('No content found yet, starting with empty content');
+					setContent('');
 					return;
 				}
-			}
-			
-			const savedSettings = localStorage.getItem('admin_settings');
-			if (savedSettings) {
-				const data = JSON.parse(savedSettings);
-				setContent(data.content || '');
-				// Backfill legacy key/event
-				if (data && typeof data.content === 'string') {
-					localStorage.setItem('customContent', data.content);
-					window.dispatchEvent(new CustomEvent('contentUpdated', { detail: { content: data.content } }));
-				}
-				return;
+				throw error;
 			}
 
-			// Legacy fallback
-			const legacyContent = localStorage.getItem('customContent');
-			if (legacyContent) {
-				setContent(legacyContent);
+			if (data) {
+				setContent(data.content || '');
+				// Dispatch event for real-time UI updates
+				window.dispatchEvent(new CustomEvent('contentUpdated', { detail: { content: data.content } }));
 			}
 		} catch (error) {
-			console.warn('Error loading content:', error);
+			console.error('Error loading content:', error);
+			setError('Failed to load content: ' + error.message);
 		}
 	};
 
@@ -75,44 +64,26 @@ const ContentManagement = () => {
 		setSuccess(null);
 
 		try {
-			const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
-			const isDevelopment = process.env.NODE_ENV === 'development';
-			
-			const settingsData = {
-				maintenance: false,
-				title: "PixelArt Converter",
-				content: content
-			};
-
-			if (!isDevelopment || process.env.REACT_APP_API_URL) {
-				const response = await fetch(`${API_BASE_URL}/api/settings`, {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify(settingsData),
+			const { error } = await supabase
+				.from('website_content')
+				.upsert({
+					id: 1,
+					slug: 'homepage',
+					content: content,
+					updated_at: new Date().toISOString()
+				}, {
+					onConflict: 'id'
 				});
 
-				if (response.ok) {
-					setSuccess('Content saved successfully!');
-					// Persist for admin panel backup
-					localStorage.setItem('admin_settings', JSON.stringify(settingsData));
-					window.dispatchEvent(new CustomEvent('settingsUpdated', { detail: settingsData }));
-					// Maintain legacy compatibility for site display
-					localStorage.setItem('customContent', content);
-					window.dispatchEvent(new CustomEvent('contentUpdated', { detail: { content } }));
-				} else {
-					throw new Error('Failed to save content');
-				}
-			} else {
-				localStorage.setItem('admin_settings', JSON.stringify(settingsData));
-				setSuccess('Content saved to localStorage!');
-				window.dispatchEvent(new CustomEvent('settingsUpdated', { detail: settingsData }));
-				// Maintain legacy compatibility for site display
-				localStorage.setItem('customContent', content);
-				window.dispatchEvent(new CustomEvent('contentUpdated', { detail: { content } }));
+			if (error) {
+				throw error;
 			}
+
+			setSuccess('Content saved successfully!');
+			// Dispatch event for real-time UI updates
+			window.dispatchEvent(new CustomEvent('contentUpdated', { detail: { content } }));
 		} catch (error) {
+			console.error('Error saving content:', error);
 			setError('Error saving content: ' + error.message);
 		} finally {
 			setSaving(false);
@@ -167,3 +138,4 @@ const ContentManagement = () => {
 };
 
 export default ContentManagement;
+
