@@ -1,28 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import FroalaEditorComponent from 'react-froala-wysiwyg';
-import 'froala-editor/css/froala_style.min.css';
-import 'froala-editor/css/froala_editor.pkgd.min.css';
-import 'froala-editor/js/plugins.pkgd.min.js';
-import 'font-awesome/css/font-awesome.css';
-import 'froala-editor/js/third_party/font_awesome.min.js';
-import './ContentEditor.css';
 import { supabase } from '../../supabaseClient';
-
-const froalaConfig = {
-	placeholderText: 'Type or paste your content here!',
-	key: 'nQE2uG3B1F1nmnspC5qpH3B3C11A6D5F5F5G4A-8A-7A2cefE3B2F3C2G2ilva1EAJLQCVLUVBf1NXNRSSATEXA-62WVLGKF2G2H2G1I4B3B2B8D7F6==',
-	toolbarButtons: [
-		['undo', 'redo', '|', 'bold', 'italic', 'underline', 'strikeThrough'],
-		['paragraphFormat', 'align', 'formatOL', 'formatUL', 'outdent', 'indent'],
-		['insertLink', 'insertTable', 'quote', 'html']
-	],
-	charCounterCount: true
-};
+import QuillEditor from '../../components/QuillEditor';
 
 const ContentManagement = () => {
 	const [content, setContent] = useState('');
-	const [saving, setSaving] = useState(false);
-	const [success, setSuccess] = useState(null);
+	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 
 	useEffect(() => {
@@ -31,6 +13,8 @@ const ContentManagement = () => {
 
 	const loadContent = async () => {
 		try {
+			// Using channel to listen for realtime updates if needed, 
+			// but for now just fetching initial state.
 			const { data, error } = await supabase
 				.from('website_content')
 				.select('content')
@@ -38,38 +22,32 @@ const ContentManagement = () => {
 				.single();
 
 			if (error) {
-				// If no row exists yet, that's okay - we'll create it on first save
 				if (error.code === 'PGRST116') {
 					console.log('No content found yet, starting with empty content');
 					setContent('');
-					return;
+				} else {
+					throw error;
 				}
-				throw error;
-			}
-
-			if (data) {
+			} else if (data) {
 				setContent(data.content || '');
-				// Dispatch event for real-time UI updates
-				window.dispatchEvent(new CustomEvent('contentUpdated', { detail: { content: data.content } }));
 			}
 		} catch (error) {
 			console.error('Error loading content:', error);
 			setError('Failed to load content: ' + error.message);
+		} finally {
+			setLoading(false);
 		}
 	};
 
-	const saveContent = async () => {
-		setSaving(true);
-		setError(null);
-		setSuccess(null);
-
+	const handleSave = async (newContent) => {
+		// This function is called by QuillEditor's Save button
 		try {
 			const { error } = await supabase
 				.from('website_content')
 				.upsert({
 					id: 1,
 					slug: 'homepage',
-					content: content,
+					content: newContent,
 					updated_at: new Date().toISOString()
 				}, {
 					onConflict: 'id'
@@ -79,16 +57,18 @@ const ContentManagement = () => {
 				throw error;
 			}
 
-			setSuccess('Content saved successfully!');
-			// Dispatch event for real-time UI updates
-			window.dispatchEvent(new CustomEvent('contentUpdated', { detail: { content } }));
+			// Dispatch event for real-time UI updates mostly for other components listening
+			window.dispatchEvent(new CustomEvent('contentUpdated', { detail: { content: newContent } }));
+
 		} catch (error) {
 			console.error('Error saving content:', error);
-			setError('Error saving content: ' + error.message);
-		} finally {
-			setSaving(false);
+			throw error; // Re-throw to let QuillEditor handle the error toast
 		}
 	};
+
+	if (loading) {
+		return <div className="p-6 text-center text-gray-500">Loading editor content...</div>;
+	}
 
 	return (
 		<div className="bg-white rounded-lg shadow-lg p-6">
@@ -97,12 +77,6 @@ const ContentManagement = () => {
 				<p className="text-gray-600">Create and manage content that will be displayed above the FAQ section on your website.</p>
 			</div>
 
-			{success && (
-				<div className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
-					{success}
-				</div>
-			)}
-
 			{error && (
 				<div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
 					{error}
@@ -110,32 +84,16 @@ const ContentManagement = () => {
 			)}
 
 			<div className="main-container">
-				<FroalaEditorComponent
-					tag='textarea'
-					model={content}
-					onModelChange={setContent}
-					config={froalaConfig}
+				{/* Render QuillEditor only after loading is done to ensure initialContent is correct */}
+				<QuillEditor
+					initialContent={content}
+					onSave={handleSave}
 				/>
-			</div>
-
-			<div className="mt-6 flex justify-end space-x-4">
-				<button
-					onClick={loadContent}
-					className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-				>
-					Reset
-				</button>
-				<button
-					onClick={saveContent}
-					disabled={saving}
-					className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-				>
-					{saving ? 'Saving...' : 'Save Content'}
-				</button>
 			</div>
 		</div>
 	);
 };
 
 export default ContentManagement;
+
 
