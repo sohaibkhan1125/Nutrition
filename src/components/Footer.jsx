@@ -38,7 +38,7 @@ const Footer = () => {
     };
 
     window.addEventListener('storage', handleStorageChange);
-    
+
     // Also check periodically in case localStorage is updated from same tab
     const interval = setInterval(() => {
       const currentTitle = localStorage.getItem('websiteTitle') || 'NutriTrack';
@@ -72,19 +72,19 @@ const Footer = () => {
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          
+
           {/* Brand Section */}
           <div className="lg:col-span-1">
             <div className="flex items-center mb-4">
               <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center mr-3">
                 <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                 </svg>
               </div>
               <h3 className="text-xl font-bold">{title}</h3>
             </div>
             <p className="text-gray-300 text-sm mb-4 leading-relaxed">
-              Your smart nutrition companion for Chinese cuisine. Discover detailed nutritional facts, track calories, and make healthier dining choices with our comprehensive database.
+              Your smart nutrition companion. Discover detailed nutritional facts, track calories, and make healthier dining choices with our comprehensive database.
             </p>
             <SocialIcons links={socialLinks} />
           </div>
@@ -169,7 +169,7 @@ const Footer = () => {
             <div className="space-y-3">
               <div className="flex items-start">
                 <svg className="w-4 h-4 text-red-400 mt-1 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
+                  <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                 </svg>
                 <p className="text-gray-300 text-sm">
                   Find Panda Express locations nationwide
@@ -177,7 +177,7 @@ const Footer = () => {
               </div>
               <div className="flex items-start">
                 <svg className="w-4 h-4 text-red-400 mt-1 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                 </svg>
                 <p className="text-gray-300 text-sm">
                   Nutrition data updated regularly
@@ -185,7 +185,7 @@ const Footer = () => {
               </div>
               <div className="flex items-start">
                 <svg className="w-4 h-4 text-red-400 mt-1 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-2 0c0-3.172-2.556-5.75-5.75-5.75a5.75 5.75 0 00-5.75 5.75c0 3.172 2.556 5.75 5.75 5.75s5.75-2.578 5.75-5.75zM10 7a3 3 0 100 6 3 3 0 000-6z" clipRule="evenodd"/>
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-2 0c0-3.172-2.556-5.75-5.75-5.75a5.75 5.75 0 00-5.75 5.75c0 3.172 2.556 5.75 5.75 5.75s5.75-2.578 5.75-5.75zM10 7a3 3 0 100 6 3 3 0 000-6z" clipRule="evenodd" />
                 </svg>
                 <p className="text-gray-300 text-sm">
                   Mobile-friendly design

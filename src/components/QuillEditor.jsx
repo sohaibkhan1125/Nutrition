@@ -5,12 +5,19 @@ import Prism from 'prismjs';
 import 'prismjs/themes/prism-tomorrow.min.css';
 import './QuillEditor.css';
 import { supabase } from '../supabaseClient';
-// Import FontAwesome 6 if not already present. 
-// Assuming the user might need it, but we can't easily add <link> tags in component. 
-// We'll trust the user or add it via useEffect if really needed, but better to assume project handles fonts.
-// However, the provided code specifically requested FA 6.5.1.
-// We'll leave it to the user's index.html or rely on existing fonts if possible, or we can use react-icons if preferred.
-// But valid requirement is to use the provided classes.
+import {
+    FaPenNib,
+    FaCode,
+    FaSun,
+    FaMoon,
+    FaCompress,
+    FaExpand,
+    FaTrash,
+    FaSave,
+    FaCopy,
+    FaTimes,
+    FaCheckCircle
+} from 'react-icons/fa';
 
 const QuillEditor = ({ initialContent, onSave }) => {
     const [editorHtml, setEditorHtml] = useState(initialContent || '');
@@ -209,25 +216,25 @@ const QuillEditor = ({ initialContent, onSave }) => {
             {/* Header */}
             <header className="quill-header">
                 <div className="quill-logo">
-                    <i className="fas fa-pen-nib"></i>
+                    <FaPenNib className="mr-2" />
                     Professional Editor
                 </div>
                 <div className="quill-header-controls">
                     <button className="quill-btn quill-btn-primary" onClick={convertToCode}>
-                        <i className="fas fa-code"></i> Convert Text to Code
+                        <FaCode className="mr-2" /> Convert Text to Code
                     </button>
                     <div style={{ width: '1px', height: '24px', background: 'var(--border-color)', margin: '0 5px' }}></div>
                     <button className="quill-btn quill-btn-icon" onClick={toggleTheme} title="Toggle Dark Mode">
-                        {darkMode ? <i className="fas fa-sun"></i> : <i className="fas fa-moon"></i>}
+                        {darkMode ? <FaSun /> : <FaMoon />}
                     </button>
                     <button className="quill-btn quill-btn-icon" onClick={() => setIsFullscreen(!isFullscreen)} title="Fullscreen">
-                        {isFullscreen ? <i className="fas fa-compress"></i> : <i className="fas fa-expand"></i>}
+                        {isFullscreen ? <FaCompress /> : <FaExpand />}
                     </button>
                     <button className="quill-btn quill-btn-icon" onClick={handleClear} title="Clear All">
-                        <i className="fas fa-trash-alt"></i>
+                        <FaTrash />
                     </button>
                     <button className="quill-btn" onClick={handleSave} title="Save Content">
-                        <i className="fas fa-save"></i> Save
+                        <FaSave className="mr-2" /> Save
                     </button>
                 </div>
             </header>
@@ -253,16 +260,18 @@ const QuillEditor = ({ initialContent, onSave }) => {
                 <div className={`quill-modal active`}>
                     <div className="quill-modal-content">
                         <div className="quill-modal-header">
-                            <h3><i className="fas fa-file-code"></i> Generated HTML Code</h3>
+                            <h3 className="flex items-center gap-2">
+                                <FaCode /> Generated HTML Code
+                            </h3>
                             <div style={{ display: 'flex', gap: '10px' }}>
-                                <button className="quill-btn" onClick={() => {
+                                <button className="quill-btn flex items-center gap-2" onClick={() => {
                                     navigator.clipboard.writeText(generatedCode);
                                     showToast('HTML code copied to clipboard');
                                 }}>
-                                    <i className="fas fa-copy"></i> Copy HTML
+                                    <FaCopy /> Copy HTML
                                 </button>
-                                <button className="quill-btn btn-icon" onClick={() => setShowCodeModal(false)}>
-                                    <i className="fas fa-times"></i>
+                                <button className="quill-btn btn-icon flex items-center justify-center font-bold" onClick={() => setShowCodeModal(false)}>
+                                    <FaTimes />
                                 </button>
                             </div>
                         </div>
@@ -275,14 +284,11 @@ const QuillEditor = ({ initialContent, onSave }) => {
 
             {/* Toast */}
             <div className={`quill-toast ${toast.show ? 'show' : ''}`} style={{ borderLeftColor: toast.type === 'error' ? 'var(--error-color)' : 'var(--primary-color)' }}>
-                <i className="fas fa-check-circle"></i>
+                <FaCheckCircle className="mr-2" />
                 <span>{toast.message}</span>
             </div>
 
             <input type="file" ref={fileInputRef} accept="image/*" style={{ display: 'none' }} onChange={handleFileChange} />
-
-            {/* Link for FontAwesome 6 if needed by the component's classes */}
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
         </div>
     );
 };

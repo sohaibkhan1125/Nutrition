@@ -1,16 +1,19 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import Header from './components/Header';
 import FilterBar from './components/FilterBar';
+import SEO from './components/SEO';
 import NutritionTable from './components/NutritionTable';
 import Footer from './components/Footer';
 import CustomContentSection from './components/CustomContentSection';
 import ProtectedRoute from './components/ProtectedRoute';
-import Login from './pages/admin/Login';
-import Signup from './pages/admin/Signup';
-import Dashboard from './pages/admin/Dashboard';
 import { nutritionData, categories } from './data/nutritionData';
+
+// Lazy load pages for better performance
+const Login = lazy(() => import('./pages/admin/Login'));
+const Signup = lazy(() => import('./pages/admin/Signup'));
+const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
 
 // Maintenance Page Component
 function MaintenancePage() {
@@ -23,16 +26,16 @@ function MaintenancePage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
           </div>
-          
+
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             Website Under Maintenance
           </h1>
-          
+
           <p className="text-gray-600 mb-6">
-            We're currently performing scheduled maintenance to improve your experience. 
+            We're currently performing scheduled maintenance to improve your experience.
             Please check back soon.
           </p>
-          
+
           <div className="bg-gradient-to-r from-red-50 to-red-100 rounded-lg p-4 border border-red-200">
             <p className="text-sm text-red-800">
               <strong>NutriTrack</strong> will be back online shortly.
@@ -62,7 +65,7 @@ function NutritionCalculator() {
     // Filter by search term
     if (searchTerm.trim()) {
       const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter(item => 
+      filtered = filtered.filter(item =>
         item.name.toLowerCase().includes(searchLower) ||
         item.category.toLowerCase().includes(searchLower) ||
         item.allergens.toLowerCase().includes(searchLower)
@@ -73,7 +76,7 @@ function NutritionCalculator() {
     if (selectedCategory === 'All Allergens') {
       filtered = filtered.filter(item => item.allergens !== 'None');
     }
-    
+
     return filtered;
   }, [searchTerm, selectedCategory]);
 
@@ -85,7 +88,7 @@ function NutritionCalculator() {
     };
 
     checkMaintenanceMode();
-    
+
     // Listen for storage changes (when admin updates maintenance mode)
     const handleStorageChange = (e) => {
       if (e.key === 'maintenanceMode') {
@@ -94,10 +97,10 @@ function NutritionCalculator() {
     };
 
     window.addEventListener('storage', handleStorageChange);
-    
+
     // Also check periodically in case localStorage is updated from same tab
     const interval = setInterval(checkMaintenanceMode, 1000);
-    
+
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       clearInterval(interval);
@@ -126,27 +129,33 @@ function NutritionCalculator() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header 
+      <SEO
+        title="Smart Chinese Cuisine Nutrition Calculator"
+        description="Your smart nutrition companion for Chinese cuisine. Discover detailed nutritional facts, track calories, and make healthier dining choices with our comprehensive database."
+        keywords="chinese cuisine nutrition, chinese food calories, chinese menu, nutrition facts, food calculator, restaurant nutrition, chinese food nutrition, chinese food allergens, healthy eating, nutrition tracker"
+        canonical="https://panda-express-nutrition.com/"
+      />
+      <Header
         searchTerm={searchTerm}
         onSearchChange={handleSearchChange}
       />
-      
+
       <FilterBar
         categories={categories}
         selectedCategory={selectedCategory}
         onCategoryChange={handleCategoryChange}
         onClearAll={handleClearAll}
       />
-      
+
       <main className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8" role="main" aria-label="Nutrition Information">
         <header className="mb-6 sm:mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4 sm:mb-6">
             <div className="mb-4 lg:mb-0">
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-                Complete Chinese Cuisine Nutrition Information
+                Complete Nutrition Information
               </h1>
               <p className="text-sm sm:text-base text-gray-600">
-                Comprehensive nutritional breakdown with calories, protein, carbohydrates, total fat, sugars, and allergen information for all Chinese cuisine menu items. Make informed dining choices with our detailed nutrition calculator.
+                Comprehensive nutritional breakdown with calories, protein, carbohydrates, total fat, sugars, and allergen information for all menu items. Make informed dining choices with our detailed nutrition calculator.
               </p>
             </div>
             <div className="lg:mt-0">
@@ -161,7 +170,7 @@ function NutritionCalculator() {
             </div>
           </div>
         </header>
-        
+
         <div>
           {(searchTerm || selectedCategory !== 'All') && (
             <div className="flex flex-wrap gap-2 mb-4">
@@ -230,14 +239,14 @@ function NutritionCalculator() {
           </div>
         </section>
 
-        <NutritionTable 
+        <NutritionTable
           data={filteredData}
           noResults={noResults}
         />
       </main>
-      
+
       <CustomContentSection />
-      
+
       <Footer />
     </div>
   );
@@ -248,26 +257,32 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <Routes>
-          {/* Admin Routes */}
-          <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
-          <Route path="/admin/login" element={<Login />} />
-          <Route path="/admin/signup" element={<Signup />} />
-          <Route 
-            path="/admin/dashboard" 
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } 
-          />
-          
-          {/* Main App Route */}
-          <Route path="/" element={<NutritionCalculator />} />
-          
-          {/* Redirect any unmatched routes to home */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <Suspense fallback={
+          <div className="min-h-screen flex items-center justify-center bg-gray-50">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+          </div>
+        }>
+          <Routes>
+            {/* Admin Routes */}
+            <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
+            <Route path="/admin/login" element={<Login />} />
+            <Route path="/admin/signup" element={<Signup />} />
+            <Route
+              path="/admin/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Main App Route */}
+            <Route path="/" element={<NutritionCalculator />} />
+
+            {/* Redirect any unmatched routes to home */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
       </Router>
     </AuthProvider>
   );

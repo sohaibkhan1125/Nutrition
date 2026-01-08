@@ -15,11 +15,10 @@ const CustomContentSection = () => {
         {
           event: '*',
           schema: 'public',
-          table: 'website_content',
+          table: 'nutrition_content',
           filter: 'id=eq.1'
         },
         (payload) => {
-          console.log('Real-time update received:', payload);
           if (payload.new && payload.new.content !== undefined) {
             setContent(payload.new.content);
           }
@@ -45,7 +44,7 @@ const CustomContentSection = () => {
   const loadContent = async () => {
     try {
       const { data, error } = await supabase
-        .from('website_content')
+        .from('nutrition_content')
         .select('content')
         .eq('id', 1)
         .single();
@@ -53,7 +52,6 @@ const CustomContentSection = () => {
       if (error) {
         // If no row exists yet, that's okay
         if (error.code === 'PGRST116') {
-          console.log('No content found yet');
           setContent('');
           return;
         }

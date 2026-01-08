@@ -12,22 +12,17 @@ const TitleManagement = () => {
 
   const handleSave = async () => {
     setIsLoading(true);
-    
+
     try {
       // Save to localStorage
       localStorage.setItem('websiteTitle', title);
-      
+
       // Update document title immediately
       document.title = title || 'Panda Express Nutrition Calculator';
-      
-      // Dispatch storage event to notify other components
-      window.dispatchEvent(new Event('storage'));
-      
+
       // Simulate a small delay for better UX
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-      console.log('Website title updated successfully!');
-      
+
     } catch (error) {
       console.error('Error saving title:', error);
     } finally {

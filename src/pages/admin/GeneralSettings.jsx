@@ -20,20 +20,17 @@ const GeneralSettings = () => {
 
   const handleSave = async () => {
     setIsLoading(true);
-    
+
     try {
       if (maintenanceMode) {
         localStorage.setItem('maintenanceMode', 'on');
       } else {
         localStorage.setItem('maintenanceMode', 'off');
       }
-      
+
       // Simulate a small delay for better UX
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Show success message (you could add a toast notification here)
-      console.log('Settings saved successfully!');
-      
+
     } catch (error) {
       console.error('Error saving settings:', error);
     } finally {
@@ -60,7 +57,7 @@ const GeneralSettings = () => {
                 When enabled, visitors will see a maintenance page instead of the normal website content.
               </p>
             </div>
-            
+
             <div className="sm:ml-6">
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -73,7 +70,7 @@ const GeneralSettings = () => {
               </label>
             </div>
           </div>
-          
+
           {maintenanceMode && (
             <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
               <div className="flex items-center">

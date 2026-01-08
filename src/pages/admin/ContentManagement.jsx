@@ -16,14 +16,13 @@ const ContentManagement = () => {
 			// Using channel to listen for realtime updates if needed, 
 			// but for now just fetching initial state.
 			const { data, error } = await supabase
-				.from('website_content')
+				.from('nutrition_content')
 				.select('content')
 				.eq('id', 1)
 				.single();
 
 			if (error) {
 				if (error.code === 'PGRST116') {
-					console.log('No content found yet, starting with empty content');
 					setContent('');
 				} else {
 					throw error;
@@ -43,7 +42,7 @@ const ContentManagement = () => {
 		// This function is called by QuillEditor's Save button
 		try {
 			const { error } = await supabase
-				.from('website_content')
+				.from('nutrition_content')
 				.upsert({
 					id: 1,
 					slug: 'homepage',

@@ -7,8 +7,9 @@ Sitemap: https://panda-express-nutrition.com/sitemap.xml
 # Crawl-delay for respectful crawling
 Crawl-delay: 1
 
-# Disallow admin or private areas (if any)
-# Disallow: /admin/
+# Disallow admin or private areas
+Disallow: /admin/
+Disallow: /admin
 # Disallow: /private/
 
 # Allow all major search engines
